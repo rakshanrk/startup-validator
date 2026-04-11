@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StartupProof — AI Idea Validator</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0a0a14;--surface:#12122a;--card:#1a1a35;--border:#2a2a50;
+      --purple:#7c83fd;--purple2:#5c63dd;--purple3:#3d4499;
+      --text:#e0e0f0;--muted:#888aaa;--hint:#555570;
+      --green:#2d6a4f;--green2:#b7e4c7;
+      --blue:#1d4e89;--blue2:#a8d0f0;
+      --red:#7b1d1d;--red2:#ffb3b3;
+      --amber:#7d4e00;--amber2:#ffd580;
+    }
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    input,textarea,select,button{font-family:inherit}
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .app{display:flex;min-height:100vh}
+    .sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);
+             display:flex;flex-direction:column;padding:24px 0;position:fixed;height:100vh;z-index:100}
+    .sidebar-logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+    .sidebar-logo h1{font-size:18px;color:var(--purple);font-weight:800}
+    .sidebar-logo span{font-size:11px;color:var(--muted)}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;
+              font-size:14px;color:var(--muted);cursor:pointer;transition:all .2s}
+    .nav-item:hover{color:var(--text);background:rgba(124,131,253,.08)}
+    .nav-item.active{color:var(--purple);background:rgba(124,131,253,.12);
+                     border-right:2px solid var(--purple)}
+    .nav-icon{font-size:16px;width:20px;text-align:center}
+    .nav-bottom{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+    .main{margin-left:220px;flex:1;padding:32px;max-width:calc(100vw - 220px)}
+    .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center}
+    .auth-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+               padding:40px;width:100%;max-width:420px}
+    .auth-card h2{font-size:24px;color:var(--purple);margin-bottom:6px;font-weight:800}
+    .auth-card p{color:var(--muted);font-size:14px;margin-bottom:28px}
+    .auth-tabs{display:flex;margin-bottom:24px;background:var(--bg);border-radius:8px;padding:4px}
+    .auth-tab{flex:1;padding:8px;text-align:center;font-size:14px;cursor:pointer;
+              border-radius:6px;color:var(--muted);transition:all .2s;border:none;background:none}
+    .auth-tab.active{background:var(--purple);color:#fff;font-weight:600}
+    .field{margin-bottom:16px}
+    .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;
+                 text-transform:uppercase;letter-spacing:.5px}
+    .field input,.field textarea,.field select{
+      width:100%;background:var(--bg);border:1px solid var(--border);
+      border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;
+      outline:none;transition:border .2s}
+    .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--purple)}
+    .field textarea{resize:vertical;min-height:90px}
+    .btn-primary{background:var(--purple);color:#fff;border:none;border-radius:8px;
+                 padding:12px 24px;font-size:14px;font-weight:600;transition:background .2s;
+                 width:100%;cursor:pointer}
+    .btn-primary:hover{background:var(--purple2)}
+    .btn-primary:disabled{background:var(--hint);cursor:not-allowed}
+    .btn-ghost{background:transparent;color:var(--purple);border:1px solid var(--border);
+               border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;
+               cursor:pointer;transition:all .2s}
+    .btn-ghost:hover{border-color:var(--purple);background:rgba(124,131,253,.08)}
+    .btn-green{background:var(--green);color:var(--green2);border:none;border-radius:8px;
+               padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+    .btn-green:hover{background:#1b4332}
+    .error-msg{background:#3d1515;border:1px solid var(--red);border-radius:8px;
+               padding:10px 14px;color:var(--red2);font-size:13px;margin-bottom:14px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;
+          padding:24px;margin-bottom:20px}
+    .card-title{font-size:16px;color:var(--purple);font-weight:600;margin-bottom:16px}
+    .page-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px}
+    .page-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+    .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+    .stat-value{font-size:28px;font-weight:800;color:var(--purple);margin:6px 0 2px}
+    .stat-sub{font-size:12px;color:var(--hint)}
+    .steps{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    .step{font-size:12px;padding:4px 10px;border-radius:20px;
+          border:1px solid var(--border);color:var(--muted)}
+    .step.done{border-color:var(--green);color:var(--green2);background:rgba(45,106,79,.15)}
+    .step.active{border-color:var(--purple);color:var(--purple);background:rgba(124,131,253,.12)}
+    .result-tabs{display:flex;gap:4px;background:var(--bg);border-radius:10px;
+                 padding:4px;margin-bottom:20px;flex-wrap:wrap}
+    .result-tab{padding:8px 16px;font-size:13px;border:none;background:none;
+                color:var(--muted);cursor:pointer;border-radius:7px;transition:all .2s;font-weight:500}
+    .result-tab.active{background:var(--purple);color:#fff;font-weight:600}
+    .result-tab:hover:not(.active){background:rgba(124,131,253,.08);color:var(--text)}
+    .score-hero{text-align:center;padding:24px 0 16px}
+    .score-num{font-size:80px;font-weight:900;line-height:1}
+    .verdict-pill{display:inline-block;padding:6px 22px;border-radius:20px;
+                  font-size:15px;font-weight:700;margin-top:10px}
+    .v-strong{background:var(--green);color:var(--green2)}
+    .v-promising{background:var(--blue);color:var(--blue2)}
+    .v-needs{background:var(--amber);color:var(--amber2)}
+    .v-risk{background:var(--red);color:var(--red2)}
+    .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .m-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px}
+    .m-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+    .m-val{font-size:20px;font-weight:700;color:var(--purple);margin:4px 0 2px}
+    .m-sub{font-size:11px;color:var(--hint)}
+    .tam-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .tam-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;
+             padding:16px;text-align:center}
+    .tam-label{font-size:10px;color:var(--purple);font-weight:700;letter-spacing:2px}
+    .tam-val{font-size:22px;font-weight:800;color:var(--text);margin:6px 0 4px}
+    .tam-sub{font-size:10px;color:var(--hint)}
+    .swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .swot-box{border-radius:8px;padding:14px}
+    .swot-title{font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+    .swot-item{font-size:12px;color:#ccc;margin-bottom:5px;padding-left:8px;
+               border-left-width:2px;border-left-style:solid}
+    .bar-row{margin-bottom:12px}
+    .bar-header{display:flex;justify-content:space-between;font-size:12px;
+                color:var(--muted);margin-bottom:4px}
+    .bar-track{background:var(--bg);border-radius:4px;height:8px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:4px;transition:width 1s ease}
+    .history-item{display:flex;align-items:center;justify-content:space-between;
+                  padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
+    .history-item:last-child{border-bottom:none}
+    .history-item:hover{opacity:.8}
+    .h-title{font-size:14px;color:var(--text);font-weight:500}
+    .h-meta{font-size:11px;color:var(--hint);margin-top:3px}
+    .h-score{font-size:24px;font-weight:800;color:var(--purple);margin-right:12px}
+    .badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+    .rec-box{background:var(--bg);border-left:3px solid var(--purple);
+             border-radius:0 8px 8px 0;padding:14px 16px;font-size:14px;
+             color:#ccc;line-height:1.7}
+    .avatar{width:32px;height:32px;border-radius:50%;background:var(--purple3);
+            display:flex;align-items:center;justify-content:center;
+            font-size:14px;font-weight:700;color:var(--purple)}
+    canvas{max-height:240px}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback} = React;
+
+const API_GW      = "http://localhost:8000";
+const API_IDEAS   = "http://localhost:8001";
+const API_SCORES  = "http://localhost:8005";
+const API_REPORTS = "http://localhost:8006";
+const API_COMP    = "http://localhost:8003";
+
+const INDUSTRIES = ["technology","healthcare","edtech","fintech","food delivery",
+  "transportation","agriculture","retail","entertainment","real estate"];
+
+function scoreColor(s){
+  return s>=75?"#2d6a4f":s>=55?"#1d6fa4":s>=35?"#e07b00":"#c0392b";
+}
+function verdictClass(v){
+  if(v==="Strong Go")  return "v-strong";
+  if(v==="Promising")  return "v-promising";
+  if(v==="Needs Work") return "v-needs";
+  return "v-risk";
+}
+function badgeBg(v){
+  if(v==="Strong Go")  return {background:"#2d6a4f",color:"#b7e4c7"};
+  if(v==="Promising")  return {background:"#1d4e89",color:"#a8d0f0"};
+  if(v==="Needs Work") return {background:"#7d4e00",color:"#ffd580"};
+  return {background:"#7b1d1d",color:"#ffb3b3"};
+}
+
+function RadarChart({data}){
+  const ref=useRef(null);
+  useEffect(()=>{
+    if(!ref.current)return;
+    const ctx=ref.current.getContext("2d");
+    const chart=new Chart(ctx,{
+      type:"radar",
+      data:{
+        labels:["Market Trend","Sentiment","Low Competition","Problem Urgency"],
+        datasets:[{
+          data:[data.trend_score,data.sentiment_score,
+                100-data.saturation_score,data.problem_urgency],
+          backgroundColor:"rgba(124,131,253,0.18)",
+          borderColor:"#7c83fd",
+          pointBackgroundColor:"#7c83fd",
+          borderWidth:2
+        }]
+      },
+      options:{
+        scales:{r:{min:0,max:100,
+          ticks:{color:"#555570",stepSize:25,backdropColor:"transparent"},
+          grid:{color:"#2a2a50"},
+          pointLabels:{color:"#ccc",font:{size:11}}
+        }},
+        plugins:{legend:{display:false}}
+      }
+    });
+    return()=>chart.destroy();
+  },[data]);
+  return <canvas ref={ref}/>;
+}
+
+/* ── Auth Page ── */
+function AuthPage({onLogin}){
+  const [tab,setTab]         = useState("login");
+  const [email,setEmail]     = useState("");
+  const [pass,setPass]       = useState("");
+  const [name,setName]       = useState("");
+  const [err,setErr]         = useState("");
+  const [loading,setLoading] = useState(false);
+
+  const handle=async()=>{
+    if(!email||!pass){setErr("Please fill all fields");return;}
+    if(tab==="register"&&!name){setErr("Please enter your name");return;}
+    setErr("");setLoading(true);
+    try{
+      const endpoint=tab==="register"?"/auth/register":"/auth/login";
+      const body=tab==="register"
+        ?{email,password:pass,name}
+        :{email,password:pass};
+      const res  = await fetch(`${API_GW}${endpoint}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(body)
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.detail||"Auth failed");
+      localStorage.setItem("sv_token",data.token);
+      localStorage.setItem("sv_user",JSON.stringify({email:data.email,name:data.name}));
+      onLogin({email:data.email,name:data.name,token:data.token});
+    }catch(e){
+      setErr(e.message);
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  return(
+    <div className="auth-wrap">
+      <div className="auth-card">
+        <h2>StartupProof</h2>
+        <p>AI-powered startup idea validation platform</p>
+        <div className="auth-tabs">
+          <button className={`auth-tab ${tab==="login"?"active":""}`}
+            onClick={()=>{setTab("login");setErr("");}}>Sign In</button>
+          <button className={`auth-tab ${tab==="register"?"active":""}`}
+            onClick={()=>{setTab("register");setErr("");}}>Register</button>
+        </div>
+        {err&&<div className="error-msg">{err}</div>}
+        {tab==="register"&&(
+          <div className="field">
+            <label>Full Name</label>
+            <input placeholder="Your name" value={name}
+              onChange={e=>setName(e.target.value)}/>
+          </div>
+        )}
+        <div className="field">
+          <label>Email</label>
+          <input type="email" placeholder="you@example.com" value={email}
+            onChange={e=>setEmail(e.target.value)}/>
+        </div>
+        <div className="field">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••" value={pass}
+            onChange={e=>setPass(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&handle()}/>
+        </div>
+        <button className="btn-primary" onClick={handle} disabled={loading}>
+          {loading?"Please wait...":(tab==="login"?"Sign In":"Create Account")}
+        </button>
+        <p style={{textAlign:"center",fontSize:"12px",color:"var(--hint)",marginTop:"16px"}}>
+          {tab==="login"?"Don't have an account? ":"Already have an account? "}
+          <span style={{color:"var(--purple)",cursor:"pointer"}}
+            onClick={()=>{setTab(tab==="login"?"register":"login");setErr("");}}>
+            {tab==="login"?"Register":"Sign In"}
+          </span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Sidebar ── */
+function Sidebar({page,setPage,user,onLogout}){
+  const items=[
+    {id:"dashboard",icon:"▦",label:"Dashboard"},
+    {id:"validate", icon:"✦",label:"Validate Idea"},
+    {id:"history",  icon:"◷",label:"History"},
+  ];
+  return(
+    <div className="sidebar">
+      <div className="sidebar-logo">
+        <h1>StartupProof</h1>
+        <span>AI Idea Validator</span>
+      </div>
+      {items.map(i=>(
+        <div key={i.id} className={`nav-item ${page===i.id?"active":""}`}
+          onClick={()=>setPage(i.id)}>
+          <span className="nav-icon">{i.icon}</span>
+          {i.label}
+        </div>
+      ))}
+      <div className="nav-bottom">
+        <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"12px"}}>
+          <div className="avatar">{user.name?user.name[0].toUpperCase():"U"}</div>
+          <div>
+            <div style={{fontSize:"13px",color:"var(--text)",fontWeight:"500"}}>
+              {user.name}
+            </div>
+            <div style={{fontSize:"11px",color:"var(--hint)"}}>{user.email}</div>
+          </div>
+        </div>
+        <button className="btn-ghost" style={{width:"100%"}} onClick={onLogout}>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── Result Tabs ── */
+function ResultView({score}){
+  const [tab,setTab]=useState("overview");
+  const [comp,setComp]=useState({loading:false,data:null,error:""});
+  const [logsState,setLogsState]=useState({loading:false,data:[]});
+  const tabs=[
+    {id:"overview",  label:"Overview"},
+    {id:"market",    label:"Market Size"},
+    {id:"swot",      label:"SWOT"},
+    {id:"breakdown", label:"Score Breakdown"},
+    {id:"recommend", label:"Recommendation"},
+    {id:"logs",      label:"Logs"},
+    {id:"competitors", label:"Competitors"},
+  ];
+
+  useEffect(()=>{
+    if(tab!=="competitors"||!score?.idea_id) return;
+    let ignore=false;
+    (async()=>{
+      setComp({loading:true,data:null,error:""});
+      try{
+        const r=await fetch(`${API_COMP}/competitors/${score.idea_id}`);
+        const d=await r.json();
+        if(!ignore){
+          if(r.ok) setComp({loading:false,data:d,error:""});
+          else setComp({loading:false,data:null,error:d?.detail||"Failed to load"});
+        }
+      }catch(e){
+        if(!ignore) setComp({loading:false,data:null,error:"Network error"});
+      }
+    })();
+    return()=>{ignore=true;};
+  },[tab,score?.idea_id]);
+
+  useEffect(()=>{
+    if(tab!=="logs"||!score?.idea_id) return;
+    let ignore=false;
+    let timer;
+    const fetchLogs=async()=>{
+      if(!ignore && logsState.data.length===0){
+        setLogsState(s=>({...s, loading:true}));
+      }
+      try{
+        const r=await fetch(`${API_SCORES}/logs/${score.idea_id}`);
+        const d=await r.json();
+        if(!ignore && r.ok){
+          setLogsState({loading:false, data:d||[]});
+        }
+      }catch(e){
+        if(!ignore && logsState.data.length===0) setLogsState(s=>({...s, loading:false}));
+      }
+      if(!ignore){
+        timer = setTimeout(fetchLogs, 3000);
+      }
+    };
+    fetchLogs();
+    return()=>{ignore=true; clearTimeout(timer);};
+  },[tab,score?.idea_id]);
+
+  return(
+    <div className="card">
+      <div className="card-title">Validation Results</div>
+      <div className="score-hero">
+        <div className="score-num" style={{color:scoreColor(score.final_score)}}>
+          {score.final_score}
+        </div>
+        <div style={{color:"var(--muted)",fontSize:"13px",marginTop:"4px"}}>
+          Validation Score
+        </div>
+        <div className={`verdict-pill ${verdictClass(score.verdict)}`}>
+          {score.verdict}
+        </div>
+      </div>
+
+      <div className="result-tabs">
+        {tabs.map(t=>(
+          <button key={t.id}
+            className={`result-tab ${tab===t.id?"active":""}`}
+            onClick={()=>setTab(t.id)}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* Overview */}
+      {tab==="overview"&&(
+        <div>
+          <RadarChart data={score}/>
+          <div className="m-grid" style={{marginTop:"16px"}}>
+            {[
+              {label:"Market Trend",    val:`${score.trend_score}/100`,
+               sub:score.trend_direction},
+              {label:"Public Sentiment",val:`${score.sentiment_score}/100`,
+               sub:score.sentiment_label},
+              {label:"Competition",     val:`${score.saturation_score}/100`,
+               sub:`${score.saturation_level} saturation`},
+              {label:"Problem Urgency", val:`${score.problem_urgency}/100`,
+               sub:score.problem_urgency>70?"High demand":"Moderate demand"},
+            ].map(m=>(
+              <div key={m.label} className="m-box">
+                <div className="m-label">{m.label}</div>
+                <div className="m-val">{m.val}</div>
+                <div className="m-sub">{m.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Market Size */}
+      {tab==="market"&&(
+        <div>
+          <div className="tam-grid" style={{marginBottom:"16px"}}>
+            {[
+              {label:"TAM",val:`$${score.tam_billion}B`,sub:"Total Addressable Market"},
+              {label:"SAM",val:`$${score.sam_billion}B`,sub:"Serviceable Addressable Market"},
+              {label:"SOM",val:`$${score.som_billion}B`,sub:"Serviceable Obtainable Market"},
+            ].map(m=>(
+              <div key={m.label} className="tam-box">
+                <div className="tam-label">{m.label}</div>
+                <div className="tam-val">{m.val}</div>
+                <div className="tam-sub">{m.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{textAlign:"center",fontSize:"13px",color:"var(--muted)",
+                       background:"var(--bg)",borderRadius:"8px",padding:"12px",
+                       marginBottom:"20px"}}>
+            Market growing at <strong style={{color:"var(--purple)"}}>
+            {score.market_growth}%</strong> annually
+          </div>
+          {[
+            {label:"TAM",val:score.tam_billion,max:score.tam_billion,color:"#7c83fd"},
+            {label:"SAM",val:score.sam_billion,max:score.tam_billion,color:"#5c63dd"},
+            {label:"SOM",val:score.som_billion,max:score.tam_billion,color:"#3d4499"},
+          ].map(b=>(
+            <div key={b.label} className="bar-row">
+              <div className="bar-header">
+                <span>{b.label}</span><span>${b.val}B</span>
+              </div>
+              <div className="bar-track">
+                <div className="bar-fill"
+                  style={{width:`${(b.val/b.max)*100}%`,background:b.color}}/>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* SWOT */}
+      {tab==="swot"&&(
+        <div>
+          {score.ai_summary&&(
+            <div style={{background:"var(--bg)",border:"1px solid var(--border)",
+                         borderRadius:"8px",padding:"16px",marginBottom:"16px",
+                         borderLeft:"3px solid var(--purple)"}}>
+              <div style={{fontSize:"11px",color:"var(--purple)",fontWeight:"700",
+                           letterSpacing:"1px",marginBottom:"8px"}}>
+                AI EXECUTIVE SUMMARY
+              </div>
+              <div style={{fontSize:"13px",color:"#ccc",lineHeight:"1.7"}}>
+                {score.ai_summary}
+              </div>
+            </div>
+          )}
+          <div className="swot-grid">
+            {[
+              {label:"Strengths",
+               items:score.ai_swot_strengths?.length
+                 ?score.ai_swot_strengths:score.swot_strengths,
+               color:"#2d6a4f",bg:"#0d2b1f",tc:"#86efac"},
+              {label:"Weaknesses",
+               items:score.ai_swot_weaknesses?.length
+                 ?score.ai_swot_weaknesses:score.swot_weaknesses,
+               color:"#c0392b",bg:"#2b0d0d",tc:"#fca5a5"},
+              {label:"Opportunities",
+               items:score.ai_swot_opportunities?.length
+                 ?score.ai_swot_opportunities:score.swot_opportunities,
+               color:"#1d6fa4",bg:"#0d1e2b",tc:"#93c5fd"},
+              {label:"Threats",
+               items:score.ai_swot_threats?.length
+                 ?score.ai_swot_threats:score.swot_threats,
+               color:"#e07b00",bg:"#2b1d0d",tc:"#fcd34d"},
+            ].map(s=>(
+              <div key={s.label} className="swot-box"
+                style={{background:s.bg,border:`1px solid ${s.color}40`}}>
+                <div className="swot-title" style={{color:s.color}}>
+                  {s.label.toUpperCase()}
+                </div>
+                {(s.items||[]).map((item,i)=>(
+                  <div key={i} className="swot-item"
+                    style={{borderLeftColor:`${s.color}80`,color:s.tc}}>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Score Breakdown */}
+      {tab==="breakdown"&&(
+        <div>
+          {[
+            {label:"Market Trend",    val:score.trend_score,    weight:"30%"},
+            {label:"Public Sentiment",val:score.sentiment_score,weight:"25%"},
+            {label:"Problem Urgency", val:score.problem_urgency,weight:"20%"},
+            {label:"Low Competition", val:100-score.saturation_score,weight:"25%"},
+          ].map(b=>(
+            <div key={b.label} className="bar-row">
+              <div className="bar-header">
+                <span>{b.label}
+                  <span style={{color:"var(--hint)",marginLeft:"6px",fontSize:"11px"}}>
+                    (weight {b.weight})
+                  </span>
+                </span>
+                <span style={{
+                  color:b.val>=70?"#86efac":b.val>=45?"#93c5fd":"#fcd34d"
+                }}>{b.val}/100</span>
+              </div>
+              <div className="bar-track">
+                <div className="bar-fill" style={{
+                  width:`${b.val}%`,
+                  background:b.val>=70?"#2d6a4f":b.val>=45?"#1d6fa4":"#e07b00"
+                }}/>
+              </div>
+            </div>
+          ))}
+          <div style={{marginTop:"20px",padding:"16px",background:"var(--bg)",
+                       borderRadius:"8px",border:"1px solid var(--border)"}}>
+            <div style={{fontSize:"12px",color:"var(--muted)",marginBottom:"6px"}}>
+              FINAL SCORE FORMULA
+            </div>
+            <div style={{fontSize:"13px",color:"var(--text)",lineHeight:"1.8"}}>
+              (Market Trend × 0.30) + (Sentiment × 0.25) +
+              (Low Competition × 0.25) + (Problem Urgency × 0.20)
+              <span style={{color:"var(--purple)",fontWeight:"700",marginLeft:"8px"}}>
+                = {score.final_score}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Recommendation */}
+      {tab==="recommend"&&(
+        <div>
+          {score.ai_risk_level&&(
+            <div style={{display:"flex",alignItems:"center",gap:"12px",
+                         background:"var(--bg)",border:"1px solid var(--border)",
+                         borderRadius:"8px",padding:"14px",marginBottom:"16px"}}>
+              <div style={{
+                padding:"6px 16px",borderRadius:"20px",fontWeight:"700",fontSize:"13px",
+                background:score.ai_risk_level==="Low"?"rgba(45,106,79,.3)":
+                           score.ai_risk_level==="High"?"rgba(123,29,29,.3)":
+                           "rgba(125,78,0,.3)",
+                color:score.ai_risk_level==="Low"?"#86efac":
+                      score.ai_risk_level==="High"?"#fca5a5":"#fcd34d"
+              }}>
+                {score.ai_risk_level} Risk
+              </div>
+              <div style={{fontSize:"13px",color:"var(--muted)"}}>
+                {score.ai_risk_reason}
+              </div>
+            </div>
+          )}
+          <div className="rec-box">
+            {score.ai_recommendation||score.recommendation}
+          </div>
+          <div style={{marginTop:"16px",display:"grid",
+                       gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+            {[
+              {label:"Market Signal",val:score.trend_direction,
+               good:score.trend_direction==="rising"},
+              {label:"Sentiment",    val:score.sentiment_label,
+               good:score.sentiment_score>50},
+              {label:"Competition",  val:score.saturation_level,
+               good:score.saturation_level!=="high"},
+              {label:"Urgency Level",val:score.problem_urgency>70?"High":"Moderate",
+               good:score.problem_urgency>70},
+            ].map(r=>(
+              <div key={r.label} style={{
+                background:"var(--bg)",border:"1px solid var(--border)",
+                borderRadius:"8px",padding:"14px",
+                display:"flex",justifyContent:"space-between",alignItems:"center"
+              }}>
+                <span style={{fontSize:"13px",color:"var(--muted)"}}>{r.label}</span>
+                <span style={{
+                  fontSize:"12px",fontWeight:"600",padding:"3px 10px",borderRadius:"10px",
+                  background:r.good?"rgba(45,106,79,.3)":"rgba(123,29,29,.3)",
+                  color:r.good?"#86efac":"#fca5a5"
+                }}>{r.val}</span>
+              </div>
+            ))}
+          </div>
+          <button className="btn-green" style={{width:"100%",marginTop:"16px"}}
+            onClick={()=>window.open(
+              `${API_REPORTS}/report/${score.idea_id}`,"_blank")}>
+            Download PDF Report
+          </button>
+        </div>
+      )}
+
+      {/* Logs */}
+      {tab==="logs"&&(
+        <div>
+          {logsState.loading && logsState.data.length===0 && (
+            <div style={{fontSize:"13px",color:"var(--muted)"}}>Loading logs...</div>
+          )}
+          {!logsState.loading && logsState.data.length===0 && (
+            <div style={{fontSize:"13px",color:"var(--muted)"}}>No logs yet</div>
+          )}
+          {logsState.data.length>0 && (
+            <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+              {logsState.data.map((l, i) => {
+                const sBg = {
+                  "idea-intake": "rgba(162, 89, 255, 0.2)",
+                  "market-data": "rgba(20, 184, 166, 0.2)",
+                  "competitor-scan": "rgba(59, 130, 246, 0.2)",
+                  "sentiment-nlp": "rgba(245, 158, 11, 0.2)",
+                  "scoring-engine": "rgba(16, 185, 129, 0.2)",
+                  "report-gen": "rgba(244, 63, 94, 0.2)",
+                  "api-gateway": "rgba(100, 116, 139, 0.2)"
+                };
+                const sCol = {
+                  "idea-intake": "#a259ff",
+                  "market-data": "#14b8a6",
+                  "competitor-scan": "#3b82f6",
+                  "sentiment-nlp": "#f59e0b",
+                  "scoring-engine": "#10b981",
+                  "report-gen": "#f43f5e",
+                  "api-gateway": "#64748b"
+                };
+                const time = l.timestamp ? new Date(l.timestamp).toLocaleTimeString([], {hour12:false}) : "";
+                
+                let bLeft = "none";
+                if(l.level==="ERROR") bLeft="3px solid var(--red)";
+                else if(l.level==="WARNING") bLeft="3px solid var(--amber)";
+                
+                return (
+                  <div key={i} style={{
+                    background:"var(--bg)", border:"1px solid var(--border)",
+                    borderRadius:"8px", padding:"12px", borderLeft: bLeft !== "none" ? bLeft : `1px solid var(--border)`
+                  }}>
+                    <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"6px"}}>
+                      <span style={{fontSize:"11px",color:"var(--muted)"}}>{time}</span>
+                      <span className="badge" style={{
+                        background: sBg[l.service] || "var(--border)",
+                        color: sCol[l.service] || "#fff"
+                      }}>
+                        {l.service}
+                      </span>
+                      <span style={{fontSize:"12px",fontWeight:"700",color:"var(--purple)"}}>{l.event}</span>
+                    </div>
+                    <div style={{fontSize:"13px",color:"#cbd5e1"}}>
+                      {l.message}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Competitors */}
+      {tab==="competitors"&&(
+        <div>
+          {comp.loading&&(
+            <div style={{fontSize:"13px",color:"var(--muted)"}}>Loading competitors…</div>
+          )}
+          {comp.error&&!comp.loading&&(
+            <div className="error-msg">{comp.error}</div>
+          )}
+          {comp.data&&(
+            <div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}}>
+                <div style={{fontSize:"12px",color:"var(--muted)"}}>
+                  Detected {comp.data.competitor_count} competitors
+                </div>
+                <span className="badge" style={{
+                  background:comp.data.saturation_level==="low"?"rgba(45,106,79,.3)":
+                             comp.data.saturation_level==="high"?"rgba(123,29,29,.3)":"rgba(125,78,0,.3)",
+                  color:comp.data.saturation_level==="low"?"#86efac":
+                        comp.data.saturation_level==="high"?"#fca5a5":"#fcd34d"
+                }}>
+                  {comp.data.saturation_level.toUpperCase()} SATURATION
+                </span>
+              </div>
+
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+                {(comp.data.competitors||[]).map((c,i)=>(
+                  <div key={`${c.name}-${i}`} className="m-box" style={{background:"var(--bg)"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
+                      <div style={{fontSize:"16px",fontWeight:700,color:"var(--text)"}}>
+                        {c.name}
+                      </div>
+                      <span className="badge" style={{
+                        background:c.source==="Product Hunt"?"rgba(124,131,253,.2)":"rgba(42,42,80,.8)",
+                        color:c.source==="Product Hunt"?"#a8b1ff":"#cbd5e1"
+                      }}>
+                        {c.source}
+                      </span>
+                    </div>
+                    <div style={{fontSize:"13px",color:"#cbd5e1",marginBottom:"10px"}}>
+                      {c.description||"Similar space; monitor positioning and differentiation."}
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                      <div style={{
+                        width:"6px",height:"6px",borderRadius:"50%",
+                        background:i%3===0?"#86efac":i%3===1?"#93c5fd":"#fcd34d"
+                      }}/>
+                      <div style={{fontSize:"11px",color:"var(--hint)"}}>
+                        Market position: {i%3===0?"niche":"generalist"} • Visibility: {i%3===2?"emerging":"established"}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{marginTop:"16px",padding:"14px",background:"var(--bg)",
+                           border:"1px solid var(--border)",borderRadius:"8px",color:"#cbd5e1",
+                           fontSize:"13px",lineHeight:1.7}}>
+                Given {comp.data.competitor_count} competitors and {comp.data.saturation_level} saturation,
+                focus on a sharp niche and a clear differentiator. Track feature gaps and pricing to position
+                against closest alternatives.
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Dashboard ── */
+function Dashboard({user,scores,setPage}){
+  const total  = scores.length;
+  const avg    = total?Math.round(scores.reduce((a,s)=>a+s.final_score,0)/total):0;
+  const strong = scores.filter(s=>
+    s.verdict==="Strong Go"||s.verdict==="Promising").length;
+  return(
+    <div>
+      <div className="page-title">Welcome back, {user.name} 👋</div>
+      <div className="page-sub">Your startup validation overview</div>
+      <div className="stats-grid">
+        {[
+          {label:"Total Validations",val:total,sub:"Ideas submitted"},
+          {label:"Average Score",    val:avg,  sub:"Out of 100",color:scoreColor(avg)},
+          {label:"Promising Ideas",  val:strong,sub:"Go or Promising",color:"#2d6a4f"},
+          {label:"Success Rate",
+           val:`${total?Math.round(strong/total*100):0}%`,
+           sub:"Viable ideas"},
+        ].map(s=>(
+          <div key={s.label} className="stat-card">
+            <div className="stat-label">{s.label}</div>
+            <div className="stat-value" style={{color:s.color||"var(--purple)"}}>
+              {s.val}
+            </div>
+            <div className="stat-sub">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+      {total>0?(
+        <div className="card">
+          <div className="card-title">Recent Validations</div>
+          {scores.slice(0,5).map(s=>(
+            <div key={s.idea_id} className="history-item">
+              <div>
+                <div className="h-title">
+                  {s.idea_title||`ID: ${s.idea_id.slice(0,8)}...`}
+                </div>
+                <div className="h-meta">
+                  {new Date(s.created_at).toLocaleDateString()}
+                </div>
+              </div>
+              <div style={{display:"flex",alignItems:"center"}}>
+                <div className="h-score">{s.final_score}</div>
+                <span className="badge" style={badgeBg(s.verdict)}>{s.verdict}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ):(
+        <div className="card" style={{textAlign:"center",padding:"48px"}}>
+          <div style={{fontSize:"48px",marginBottom:"12px"}}>✦</div>
+          <div style={{fontSize:"18px",fontWeight:"600",marginBottom:"8px"}}>
+            No validations yet
+          </div>
+          <div style={{color:"var(--muted)",marginBottom:"20px",fontSize:"14px"}}>
+            Submit your first startup idea to get AI-powered insights
+          </div>
+          <button className="btn-primary"
+            style={{width:"auto",padding:"12px 32px"}}
+            onClick={()=>setPage("validate")}>
+            Validate My First Idea
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Validate Page ── */
+function ValidatePage({user,onResult}){
+  const [form,setForm]       = useState({
+    title:"",description:"",industry:"technology"});
+  const [loading,setLoading] = useState(false);
+  const [step,setStep]       = useState(-1);
+  const [error,setError]     = useState("");
+  const [result,setResult]   = useState(null);
+
+  const steps=["Submitting idea","Analyzing market trends",
+    "Scanning competitors","NLP sentiment analysis",
+    "Calculating score","Generating PDF report"];
+
+  const submit=async()=>{
+    if(!form.title||!form.description){
+      setError("Please fill in all fields");return;
+    }
+    setError("");setLoading(true);setResult(null);setStep(0);
+    try{
+      const res=await fetch(`${API_IDEAS}/ideas`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          user_email:  user.email,
+          title:       form.title,
+          description: form.description,
+          industry:    form.industry
+        })
+      });
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.detail||"Submission failed");
+
+      const delays=[0,8000,8000,8000,10000,5000];
+      for(let s=1;s<steps.length;s++){
+        await new Promise(r=>setTimeout(r,delays[s]));
+        setStep(s);
+        if(s===steps.length-1){
+          try{
+            const sr=await fetch(`${API_SCORES}/score/${data.idea_id}`);
+            const sd=await sr.json();
+            if(sr.ok){
+              setResult(sd);
+              onResult(sd);
+              setLoading(false);
+              return;
+            }
+          }catch(e){}
+          setError("Score not ready — wait a few seconds and retry.");
+          setLoading(false);
+        }
+      }
+    }catch(e){
+      setError(e.message);
+      setLoading(false);
+      setStep(-1);
+    }
+  };
+
+  return(
+    <div>
+      <div className="page-title">Validate Your Idea</div>
+      <div className="page-sub">AI-powered analysis in about 40 seconds</div>
+      {!result&&(
+        <div className="card">
+          <div className="field">
+            <label>Startup Idea Title</label>
+            <input placeholder="e.g. AI tutor app for students"
+              value={form.title}
+              onChange={e=>setForm({...form,title:e.target.value})}/>
+          </div>
+          <div className="field">
+            <label>Description</label>
+            <textarea
+              placeholder="Describe what your startup does, who it's for, and the problem it solves..."
+              value={form.description}
+              onChange={e=>setForm({...form,description:e.target.value})}/>
+          </div>
+          <div className="field">
+            <label>Industry</label>
+            <select value={form.industry}
+              onChange={e=>setForm({...form,industry:e.target.value})}>
+              {INDUSTRIES.map(i=>(
+                <option key={i} value={i}>
+                  {i.charAt(0).toUpperCase()+i.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+          {error&&<div className="error-msg">{error}</div>}
+          {loading&&step>=0&&(
+            <div style={{marginBottom:"16px"}}>
+              <div className="steps">
+                {steps.map((s,i)=>(
+                  <span key={i}
+                    className={`step ${i<step?"done":i===step?"active":""}`}>
+                    {i<step?"✓ ":i===step?"⟳ ":""}{s}
+                  </span>
+                ))}
+              </div>
+              <div style={{fontSize:"12px",color:"var(--hint)"}}>
+                Processing... ~40 seconds
+              </div>
+            </div>
+          )}
+          <button className="btn-primary" onClick={submit} disabled={loading}>
+            {loading?"Validating your idea...":"Validate My Idea"}
+          </button>
+        </div>
+      )}
+      {result&&(
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",
+                       alignItems:"center",marginBottom:"16px"}}>
+            <div style={{fontSize:"14px",color:"var(--muted)"}}>
+              Validation complete
+            </div>
+            <button className="btn-ghost" onClick={()=>{
+              setResult(null);setStep(-1);
+              setForm({title:"",description:"",industry:"technology"});
+            }}>
+              Validate Another Idea
+            </button>
+          </div>
+          <ResultView score={result}/>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── History Page ── */
+function HistoryPage({scores}){
+  const [selected,setSelected]=useState(null);
+
+  const loadFull=async(idea_id)=>{
+    try{
+      const r=await fetch(`${API_SCORES}/score/${idea_id}`);
+      const d=await r.json();
+      if(r.ok) setSelected(d);
+    }catch(e){}
+  };
+
+  if(selected){
+    return(
+      <div>
+        <button className="btn-ghost" style={{marginBottom:"16px"}}
+          onClick={()=>setSelected(null)}>
+          ← Back to History
+        </button>
+        <ResultView score={selected}/>
+      </div>
+    );
+  }
+
+  return(
+    <div>
+      <div className="page-title">Validation History</div>
+      <div className="page-sub">Your past startup validations</div>
+      {scores.length===0?(
+        <div className="card" style={{textAlign:"center",padding:"48px"}}>
+          <div style={{fontSize:"14px",color:"var(--muted)"}}>
+            No validations yet. Submit your first idea!
+          </div>
+        </div>
+      ):(
+        <div className="card">
+          {scores.map(s=>(
+            <div key={s.idea_id} className="history-item"
+              onClick={()=>loadFull(s.idea_id)}>
+              <div>
+                <div className="h-title">
+                  {s.idea_title||`ID: ${s.idea_id.slice(0,8)}...`}
+                </div>
+                <div className="h-meta">
+                  {new Date(s.created_at).toLocaleDateString()} — click to view full report
+                </div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                <div className="h-score">{s.final_score}</div>
+                <span className="badge" style={badgeBg(s.verdict)}>
+                  {s.verdict}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── App ── */
+function App(){
+  const [user,setUser]     = useState(()=>{
+    try{
+      const u=localStorage.getItem("sv_user");
+      const t=localStorage.getItem("sv_token");
+      return u&&t?{...JSON.parse(u),token:t}:null;
+    }catch{return null;}
+  });
+  const [page,setPage]     = useState("dashboard");
+  const [scores,setScores] = useState([]);
+
+  const fetchScores=useCallback(async(email)=>{
+    try{
+      const r=await fetch(
+        `${API_SCORES}/scores?user_email=${encodeURIComponent(email)}`);
+      const d=await r.json();
+      if(Array.isArray(d)) setScores(d);
+    }catch(e){}
+  },[]);
+
+  useEffect(()=>{
+    if(user) fetchScores(user.email);
+  },[user,fetchScores]);
+
+  const login=u=>{
+    setUser(u);
+    fetchScores(u.email);
+  };
+  const logout=()=>{
+    setUser(null);
+    setScores([]);
+    localStorage.removeItem("sv_user");
+    localStorage.removeItem("sv_token");
+    setPage("dashboard");
+  };
+  const onNewResult=s=>{
+    setScores(prev=>[s,...prev]);
+    setPage("history");
+  };
+
+  if(!user) return <AuthPage onLogin={login}/>;
+
+  return(
+    <div className="app">
+      <Sidebar page={page} setPage={setPage} user={user} onLogout={logout}/>
+      <div className="main">
+        {page==="dashboard"&&
+          <Dashboard user={user} scores={scores} setPage={setPage}/>}
+        {page==="validate"&&
+          <ValidatePage user={user} onResult={onNewResult}/>}
+        {page==="history"&&
+          <HistoryPage scores={scores}/>}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+INFO:     Will watch for changes in these directories: ['/app']
+INFO:     Uvicorn running on http://0.0.0.0:8005 (Press CTRL+C to quit)
+INFO:     Started reloader process [1] using WatchFiles
+INFO:     Started server process [7]
+INFO:     Waiting for application startup.
+Scoring Engine: PostgreSQL connected
+H0 reached startup_event
+{"id": "log_1775915486951_ed594a", "timestamp": 1775915486952, "runId": "debug-pre", "hypothesisId": "H0", "location": "services/scoring-engine/main.py:startup_event", "message": "scoring-engine started", "data": {"gemini_api_key_set": true}}
+INFO:     Application startup complete.
+Consumer attempt 1/15: NoBrokersAvailable
+Consumer attempt 2/15: NoBrokersAvailable
+Consumer attempt 3/15: NoBrokersAvailable
+Scoring Engine: Kafka connected
+INFO:     172.18.0.1:44628 - "GET /scores?user_email=demo%40example.com HTTP/1.1" 200 OK
+INFO:     172.18.0.1:44628 - "GET /scores?user_email=demo%40example.com HTTP/1.1" 200 OK
+Scoring Engine: received 7616e694-c8ef-405e-9281-6850c3cfba09
+Scoring Engine: waiting (1/12) — trend=no sentiment=no competitor=no
+Scoring Engine: all data ready for 7616e694-c8ef-405e-9281-6850c3cfba09
+{"id": "log_1775915705337_0f5a72", "timestamp": 1775915705337, "runId": "debug-pre", "hypothesisId": "H1", "location": "services/scoring-engine/main.py:enrich_with_ai:start", "message": "enrich_with_ai start", "data": {"api_key_set": true, "model_name": "gemini-2.5-flash", "idea_title_len": 16, "idea_description_len": 60}}
+{"id": "log_1775915707506_55c90b", "timestamp": 1775915707506, "runId": "debug-pre", "hypothesisId": "H3", "location": "services/scoring-engine/main.py:enrich_with_ai:before_generate", "message": "about to call Gemini", "data": {"prompt_chars": 1327, "final_score": 58, "verdict": "Promising"}}
+Gemini AI enrichment failed: 403 Your API key was reported as leaked. Please use another API key.
+{"id": "log_1775915709530_305cea", "timestamp": 1775915709530, "runId": "debug-pre", "hypothesisId": "H2_H5", "location": "services/scoring-engine/main.py:enrich_with_ai:error", "message": "Gemini AI enrichment failed", "data": {"error_type": "PermissionDenied", "error_message": "403 Your API key was reported as leaked. Please use another API key."}}
+{"id": "log_1775915709558_439831", "timestamp": 1775915709558, "runId": "debug-pre", "hypothesisId": "H5", "location": "services/scoring-engine/main.py:wait_and_score:ai_outcome", "message": "AI enrichment outcome", "data": {"ai_data_present": false, "ai_summary_len": 0, "ai_recommendation_len": 0}}
+Scoring Engine: score=58 verdict=Promising title=AI Pet Whisperer
+{"id": "log_1775915739438_2a3817", "timestamp": 1775915739440, "runId": "debug-pre", "hypothesisId": "H6", "location": "services/scoring-engine/main.py:get_score:return_check", "message": "/score returning AI fields (lengths only)", "data": {"ai_summary_len": 0, "ai_recommendation_len": 0, "ai_swot_strengths_len": 0, "ai_swot_weaknesses_len": 0, "ai_swot_opportunities_len": 0, "ai_swot_threats_len": 0}}
+INFO:     172.18.0.1:60802 - "GET /score/7616e694-c8ef-405e-9281-6850c3cfba09 HTTP/1.1" 200 OK
+{"id": "log_1775915748683_f6f6d1", "timestamp": 1775915748683, "runId": "debug-pre", "hypothesisId": "H6", "location": "services/scoring-engine/main.py:get_score:return_check", "message": "/score returning AI fields (lengths only)", "data": {"ai_summary_len": 0, "ai_recommendation_len": 0, "ai_swot_strengths_len": 0, "ai_swot_weaknesses_len": 0, "ai_swot_opportunities_len": 0, "ai_swot_threats_len": 0}}
+INFO:     172.18.0.1:36882 - "GET /score/7616e694-c8ef-405e-9281-6850c3cfba09 HTTP/1.1" 200 OK
+{"id": "log_1775915875246_3ce185", "timestamp": 1775915875247, "runId": "debug-pre", "hypothesisId": "H6", "location": "services/scoring-engine/main.py:get_score:return_check", "message": "/score returning AI fields (lengths only)", "data": {"ai_summary_len": 0, "ai_recommendation_len": 0, "ai_swot_strengths_len": 0, "ai_swot_weaknesses_len": 0, "ai_swot_opportunities_len": 0, "ai_swot_threats_len": 0}}
+INFO:     172.18.0.1:46686 - "GET /score/7616e694-c8ef-405e-9281-6850c3cfba09 HTTP/1.1" 200 OK

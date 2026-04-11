@@ -1,0 +1,9 @@
+fastapi==0.111.0
+uvicorn==0.29.0
+pymongo==4.7.1
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9
+kafka-python==2.0.2
+reportlab==4.1.0
+python-dotenv==1.0.0
+pydantic==2.7.0
