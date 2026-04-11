@@ -142,11 +142,12 @@
 <script type="text/babel">
 const {useState,useEffect,useRef,useCallback} = React;
 
-const API_GW      = "http://localhost:8000";
-const API_IDEAS   = "http://localhost:8001";
-const API_SCORES  = "http://localhost:8005";
-const API_REPORTS = "http://localhost:8006";
-const API_COMP    = "http://localhost:8003";
+const HOST = window.location.hostname || "localhost";
+const API_GW      = `http://${HOST}:8000`;
+const API_IDEAS   = `http://${HOST}:8001`;
+const API_SCORES  = `http://${HOST}:8005`;
+const API_REPORTS = `http://${HOST}:8006`;
+const API_COMP    = `http://${HOST}:8003`;
 
 const INDUSTRIES = ["technology","healthcare","edtech","fintech","food delivery",
   "transportation","agriculture","retail","entertainment","real estate"];
