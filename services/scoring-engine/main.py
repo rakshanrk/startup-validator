@@ -401,8 +401,14 @@ def enrich_with_ai(idea_title: str, idea_description: str,
         
         client = groq.Groq(api_key=api_key)
 
-        prompt = f"""You are a startup validation agent. Use your tools to research this idea if needed. Ensure you evaluate the logic of the idea relative to the heuristic scores provided. 
-CRITICAL SANITY CHECK: If the idea is a parody, intrinsically absurd, illegal, or physically impossible (e.g., physical email delivery bikes, generating gravity with hamsters), you MUST overrule the Initial Validation Score! Set `sanity_check` to false and lower the `adjusted_score` strictly to between 0 and 15! If it is a genuine idea, set `sanity_check` to true and provide an `adjusted_score` that matches or slightly tweaks the Initial Validation Score.
+        prompt = f"""You are an elite, Shark Tank-style startup validation agent. Your job is to aggressively and realistically evaluate this startup idea.
+
+CRITICAL SCORING INSTRUCTIONS:
+1. The "Initial Validation Score" provided below is just a naive heuristic based on scraped keywords. You MUST NOT blindly copy it!
+2. You must deeply evaluate the idea's actual business viability, scalability, logistical nightmares, user acquisition cost, and true uniqueness.
+3. If the idea is a logistical nightmare, highly unscalable, hyper-niche, or slightly silly (e.g., mailing 30-year-old fragile newspapers globally), you MUST heavily penalize the `adjusted_score` (e.g., drop to 20-45) regardless of the heuristic score.
+4. If the idea is an absolute game-changer, highly scalable, and truly solves a massive unmet need, deeply boost the `adjusted_score` (e.g., 75-95).
+5. PARODY SANITY CHECK: If the idea is an absolute joke, physically impossible, or illegal (e.g., generating gravity via hamsters), set `sanity_check` to false and drop the score to 0-15.
 
 Respond with ONLY a raw JSON object — no markdown, no code blocks.
 CRITICAL FORMATTING RULES:
