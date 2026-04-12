@@ -418,18 +418,18 @@ Problem Urgency: {score_data.get('problem_urgency')}/100
 Number of Competitors: {score_data.get('competitor_count')}
 Total Addressable Market: ${score_data.get('tam_billion')}B
 
-Respond exactly with this JSON:
+Respond exactly with this JSON schema (replace the <placeholders> with your own generated values):
 {{
-  "adjusted_score": 59,
-  "sanity_check": true,
-  "summary": "2-3 sentence executive summary specific to this exact idea and its market position",
-  "strengths": ["very specific strength 1 about this idea", "very specific strength 2", "very specific strength 3"],
-  "weaknesses": ["very specific weakness 1 about this idea", "very specific weakness 2"],
-  "opportunities": ["very specific opportunity 1 for this idea", "very specific opportunity 2", "very specific opportunity 3"],
-  "threats": ["very specific threat 1 for this idea", "very specific threat 2"],
-  "recommendation": "2-3 sentence actionable recommendation with concrete next steps specific to this idea",
-  "risk_level": "Low",
-  "risk_reason": "One sentence explaining the single biggest risk for this specific idea"
+  "adjusted_score": <integer between 0 and 100 representing the final score>,
+  "sanity_check": <boolean, true if genuine, false if absurd/impossible>,
+  "summary": "<2-3 sentence executive summary specific to this exact idea>",
+  "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
+  "weaknesses": ["<weakness 1>", "<weakness 2>"],
+  "opportunities": ["<opportunity 1>", "<opportunity 2>", "<opportunity 3>"],
+  "threats": ["<threat 1>", "<threat 2>"],
+  "recommendation": "<actionable recommendation with concrete next steps>",
+  "risk_level": "<Low or Medium or High>",
+  "risk_reason": "<One sentence explaining the single biggest risk>"
 }}"""
 
         # #region agent log
