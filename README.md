@@ -1,4 +1,4 @@
-# 🚀 StartupProof — AI-Powered Startup Idea Validation Platform
+# StartupProof — AI-Powered Startup Idea Validation Platform
 
 <div align="center">
 
@@ -12,13 +12,13 @@
 
 **A production-grade, cloud-deployed microservice platform that validates startup ideas using real-time market data, NLP sentiment analysis, competitive intelligence, and an agentic LLM scoring engine.**
 
-[🌐 Live Demo](http://13.206.72.87:3000) · [📖 Documentation](#-architecture-deep-dive) · [🐛 Issues](https://github.com/rakshanrk/startup-validator/issues)
+[Live Demo](http://13.206.72.87:3000) · [Documentation](#-architecture-deep-dive) · [Issues](https://github.com/rakshanrk/startup-validator/issues)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Project Overview](#-project-overview)
 2. [Architecture Deep Dive](#-architecture-deep-dive)
@@ -36,7 +36,7 @@
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 **StartupProof** is a full-stack, cloud-native application built as a Semester 6 Cloud Computing project. It demonstrates industry-grade microservice architecture patterns, including:
 
@@ -55,7 +55,7 @@ A user submits a startup idea (title, description, industry). Within ~30 seconds
 
 ---
 
-## 🏗️ Architecture Deep Dive
+## Architecture Deep Dive
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -123,7 +123,7 @@ A user submits a startup idea (title, description, industry). Within ~30 seconds
 
 ---
 
-## 🔬 Microservices Explained
+## Microservices Explained
 
 ### 1. `api-gateway` (Port 8000)
 The single entry point for all client requests. Responsibilities:
@@ -188,7 +188,7 @@ A **Kafka consumer** that listens for `score-ready` events.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
@@ -210,7 +210,7 @@ A **Kafka consumer** that listens for `score-ready` events.
 
 ---
 
-## 📡 Event-Driven Data Flow
+## Event-Driven Data Flow
 
 The platform uses **Apache Kafka** as its nervous system. Kafka decouples services so that a failure in one pipeline (e.g., Reddit being slow) does not block the others.
 
@@ -229,7 +229,7 @@ The `scoring-engine` is clever: it uses a **polling loop** (not a Kafka consumer
 
 ---
 
-## 🤖 AI Scoring Engine
+## AI Scoring Engine
 
 This is the most technically advanced component.
 
@@ -292,7 +292,7 @@ If `ai_data.adjusted_score` is returned, it **completely replaces** the heuristi
 
 ---
 
-## 🗄️ Database Design
+## Database Design
 
 ### PostgreSQL (Structured Data)
 
@@ -343,7 +343,7 @@ If `ai_data.adjusted_score` is returned, it **completely replaces** the heuristi
 
 ---
 
-## ☁️ AWS EC2 Deployment
+## AWS EC2 Deployment
 
 ### Infrastructure
 - **Instance Type**: t2.medium (2 vCPU, 4GB RAM) — minimum viable for 13 Docker containers
@@ -397,7 +397,7 @@ AWS EC2 instances get a **new Public IP on every restart** unless you allocate a
 
 ---
 
-## 🔐 Security Architecture
+## Security Architecture
 
 ### Authentication Flow
 ```
@@ -418,7 +418,7 @@ AWS EC2 instances get a **new Public IP on every restart** unless you allocate a
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 All endpoints are proxied through the **API Gateway** on port 8000.
 
@@ -445,7 +445,7 @@ Every microservice exposes `GET /health` → `{"status": "ok", "service": "<name
 
 ---
 
-## 💻 Local Development Setup
+## Local Development Setup
 
 ### Prerequisites
 - Docker Desktop (Windows/Mac) or Docker Engine (Linux)
@@ -481,7 +481,7 @@ docker compose down
 
 ---
 
-## 🔑 Environment Variables
+## Environment Variables
 
 Create a `.env` file in the project root with these variables:
 
@@ -507,7 +507,7 @@ SECRET_KEY=your_super_secret_jwt_key_here
 
 ---
 
-## ⚠️ Known Limitations & Future Work
+## Known Limitations & Future Work
 
 ### Current Limitations
 | Issue | Root Cause | Impact |
@@ -530,22 +530,16 @@ SECRET_KEY=your_super_secret_jwt_key_here
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Rakshan RK** — Semester 6, Cloud Computing Project  
 GitHub: [@rakshanrk](https://github.com/rakshanrk)
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
-
 <div align="center">
 
-Built with ❤️ using FastAPI, Kafka, Docker, and AWS EC2
+Built using FastAPI, Kafka, Docker, and AWS EC2
 
 *"The best way to validate a startup idea is to let an AI roast it first."*
 
