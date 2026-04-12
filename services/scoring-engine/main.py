@@ -405,6 +405,10 @@ def enrich_with_ai(idea_title: str, idea_description: str,
 CRITICAL SANITY CHECK: If the idea is a parody, intrinsically absurd, illegal, or physically impossible (e.g., physical email delivery bikes, generating gravity with hamsters), you MUST overrule the Initial Validation Score! Set `sanity_check` to false and lower the `adjusted_score` strictly to between 0 and 15! If it is a genuine idea, set `sanity_check` to true and provide an `adjusted_score` that matches or slightly tweaks the Initial Validation Score.
 
 Respond with ONLY a raw JSON object — no markdown, no code blocks.
+CRITICAL FORMATTING RULES:
+1. ALL strings must be properly escaped (do NOT use unescaped double quotes inside values).
+2. NO trailing commas.
+3. Your ENTIRE response MUST be parsable by python's json.loads().
 
 Startup Idea: {idea_title}
 Description: {idea_description}
@@ -456,8 +460,7 @@ Respond exactly with this JSON:
                         model=model_name,
                         messages=msgs,
                         tools=agentic_tools,
-                        tool_choice="auto",
-                        response_format={"type": "json_object"}
+                        tool_choice="auto"
                     )
                 except Exception as e:
                     if attempt < max_retries - 1 and ("429" in str(e).lower() or "rate" in str(e).lower()):
