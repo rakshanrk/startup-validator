@@ -409,6 +409,7 @@ CRITICAL SCORING INSTRUCTIONS:
 3. If the idea is a logistical nightmare, highly unscalable, hyper-niche, or slightly silly (e.g., mailing 30-year-old fragile newspapers globally), you MUST heavily penalize the `adjusted_score` (e.g., drop to 20-45) regardless of the heuristic score.
 4. If the idea is an absolute game-changer, highly scalable, and truly solves a massive unmet need, deeply boost the `adjusted_score` (e.g., 75-95).
 5. PARODY SANITY CHECK: If the idea is an absolute joke, physically impossible, or illegal (e.g., generating gravity via hamsters), set `sanity_check` to false and drop the score to 0-15.
+6. DYNAMIC MARKET SIZING: The heuristic Total Addressable Market (TAM) provided below is a fake global industry average. You MUST recalculate realistic, heavily-scrutinized `tam_billion`, `sam_billion`, and `som_billion` (in billions of $) specifically for this exact product. If the idea is a joke or for one single person, TAM MUST be $0.0!
 
 Respond with ONLY a raw JSON object — no markdown, no code blocks.
 CRITICAL FORMATTING RULES:
@@ -426,12 +427,16 @@ Public Sentiment: {score_data.get('sentiment_label')} (score: {score_data.get('s
 Competition Level: {score_data.get('saturation_level')} (score: {score_data.get('saturation_score')}/100)
 Problem Urgency: {score_data.get('problem_urgency')}/100
 Number of Competitors: {score_data.get('competitor_count')}
-Total Addressable Market: ${score_data.get('tam_billion')}B
+Total Addressable Market (Global Industry Average): ${score_data.get('tam_billion')}B
 
 Respond exactly with this JSON structure (replace the values with your own analysis, do not copy the template exactly):
 {{
   "adjusted_score": <integer from 0 to 100>,
   "sanity_check": <boolean>,
+  "tam_billion": <float, e.g., 1.5 or 0.0>,
+  "sam_billion": <float, e.g., 0.5 or 0.0>,
+  "som_billion": <float, e.g., 0.05 or 0.0>,
+  "market_growth": <float percentage, e.g., 15.5>,
   "summary": "<2-3 sentence executive summary specific to this exact idea>",
   "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
   "weaknesses": ["<weakness 1>", "<weakness 2>"],
@@ -550,6 +555,10 @@ Respond exactly with this JSON structure (replace the values with your own analy
         parsed = {
             "adjusted_score": result.get("adjusted_score"),
             "sanity_check":   bool(result.get("sanity_check", True)),
+            "tam_billion":    result.get("tam_billion"),
+            "sam_billion":    result.get("sam_billion"),
+            "som_billion":    result.get("som_billion"),
+            "market_growth":  result.get("market_growth"),
             "summary":        str(result.get("summary", "")).strip(),
             "strengths":      ensure_list(result.get("strengths"), 3),
             "weaknesses":     ensure_list(result.get("weaknesses"), 2),
@@ -661,6 +670,15 @@ def wait_and_score(idea_id: str, db, producer, retries=12, delay=5):
                 scored["ai_recommendation"]       = recommendation
                 scored["ai_risk_level"]           = ai_data.get("risk_level", "Medium")
                 scored["ai_risk_reason"]          = ai_data.get("risk_reason", "")
+                
+                if ai_data.get("tam_billion") is not None:
+                    scored["tam_billion"] = float(ai_data["tam_billion"])
+                if ai_data.get("sam_billion") is not None:
+                    scored["sam_billion"] = float(ai_data["sam_billion"])
+                if ai_data.get("som_billion") is not None:
+                    scored["som_billion"] = float(ai_data["som_billion"])
+                if ai_data.get("market_growth") is not None:
+                    scored["market_growth"] = float(ai_data["market_growth"])
 
             # Serialize SWOT lists to JSON strings
             for key in ["swot_strengths","swot_weaknesses",
