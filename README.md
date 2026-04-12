@@ -533,7 +533,9 @@ SECRET_KEY=your_super_secret_jwt_key_here
 ## Author
 
 **Rakshan RK** — Semester 6, Cloud Computing End Semester Project
+
 GitHub: [@rakshanrk](https://github.com/rakshanrk)
+
 LinkedIn: [rakshanrk](https://www.linkedin.com/in/rakshanrk)
 
 ---
